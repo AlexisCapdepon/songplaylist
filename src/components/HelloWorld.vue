@@ -5,14 +5,14 @@
         max-width="350"
     >
       <v-img
-          src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
+          :src="require('../assets/' + current.picture)"
           height="250px"
       ></v-img>
       <v-row dense class="d-flex justify-center">
         <v-col class="d-flex justify-center flex-column align-center">
-          <p class="pa-0 ma-0">{{ track }}</p>
-          <p class="pa-0 ma-0">{{artist}}</p>
-          <p v-if="trackDuration"> {{ datingTime }} / {{ trackDuration }}</p>
+          <p class="pa-0 ma-0">{{ current.track }}</p>
+          <p class="pa-0 ma-0">{{ current.artist }}</p>
+          <p v-if="current.trackDuration"> {{ datingTime }} / {{ current.trackDuration }}</p>
         </v-col>
         <v-col class="d-flex justify-center align-center">
           <v-card-actions>
@@ -22,6 +22,7 @@
                 dark
                 small
                 color="blue"
+                @click="backSong"
             >
               <v-icon dark>
                 mdi-skip-backward
@@ -33,12 +34,11 @@
                 v-if="!played"
                 class="mx-2"
                 fab
-                dark
                 small
                 @click="startSong"
                 color="blue"
             >
-              <v-icon>
+              <v-icon dark>
                 mdi-play
               </v-icon>
             </v-btn>
@@ -52,7 +52,7 @@
                 @click="stopSong"
                 color="blue"
             >
-              <v-icon>
+              <v-icon dark>
                 mdi-pause
               </v-icon>
             </v-btn>
@@ -64,6 +64,7 @@
                 dark
                 small
                 color="blue"
+                @click="nextSong"
             >
               <v-icon dark>
                 mdi-skip-forward
@@ -83,48 +84,93 @@ export default {
   name: "HelloWorld",
   data: function () {
     return {
-      sound: '',
       played: false,
-      artist: 'Jul',
-      track: 'En Y !',
-      trackDuration: '',
-      interval: null,
-      currentTrackDuration: 0,
+      indexPlaylist: 0,
+      playlist: [
+        {
+          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
+          picture: 'jul.jpg',
+          artist: 'RRul',
+          track: 'En Y !',
+        },
+        {
+          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
+          artist: 'Ju',
+          track: 'EnY !',
+        },
+        {
+          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
+          artist: 'l',
+          track: ' Y !',
+        },
+      ],
+      current: {
+        sound: '',
+        artist: '',
+        picture: '',
+        track: '',
+        trackDuration: '',
+        interval: null,
+        currentTrackDuration: 0,
+      }
     }
   },
   methods: {
     startSong(){
-      this.sound.play();
+      this.current.sound.play();
       this.seekUpdate();
       this.played = true;
-      this.trackDuration = new Date(this.sound.duration * 1000).toISOString().substr(11, 8);
+      this.current.trackDuration = new Date(this.current.sound.duration * 1000).toISOString().substr(11, 8);
     },
     stopSong(){
-      this.sound.pause();
+      this.current.sound.pause();
       this.played = false
-      clearInterval(this.interval);
+      clearInterval(this.current.interval);
     },
     seekUpdate() {
-      this.interval = setInterval(() => {
-       this.currentTrackDuration += 1
+      this.current.interval = setInterval(() => {
+       this.current.currentTrackDuration += 1
       }, 1000);
-    }
+    },
+    nextSong() {
+      this.indexPlaylist += 1;
+      if (this.indexPlaylist >= this.playlist.length) {
+        this.indexPlaylist -= 1;
+      }
+      this.current.artist = this.playlist[this.indexPlaylist].artist;
+      this.current.track = this.playlist[this.indexPlaylist].track;
+      this.current.sound = new Audio(require("@/assets/"+this.playlist[this.indexPlaylist].url));
+    },
+    backSong() {
+      this.indexPlaylist -= 1;
+      if (this.indexPlaylist < 0 ) {
+        this.indexPlaylist += 1;
+      }
+      this.current.artist = this.playlist[this.indexPlaylist].artist;
+      this.current.track = this.playlist[this.indexPlaylist].track;
+      this.current.picture = this.playlist[this.indexPlaylist].picture;
+      this.current.sound = new Audio(require("@/assets/"+this.playlist[this.indexPlaylist].url));
+    },
   },
   computed: {
     datingTime: function () {
-      return new Date(this.currentTrackDuration * 1000).toISOString().substr(11, 8);
+      return new Date(this.current.currentTrackDuration * 1000).toISOString().substr(11, 8);
     }
   },
   watch: {
     currentTrackDuration(val) {
-      if (val > this.sound.duration) {
-        clearInterval(this.interval);
-        this.trackDuration = 0
+      if (val > this.current.sound.duration) {
+        clearInterval(this.current.interval);
+        this.current.trackDuration = 0;
+        this.played = false;
       }
     },
   },
   created() {
-    this.sound = new Audio(require("@/assets/JUL - EN Y _ CLIP OFFICIEL _ D'OR ET DE PLATINE _ 2015.mp3"));
+    this.current.artist = this.playlist[this.indexPlaylist].artist;
+    this.current.track = this.playlist[this.indexPlaylist].track;
+    this.current.picture = this.playlist[this.indexPlaylist].picture
+    this.current.sound = new Audio(require("@/assets/"+this.playlist[this.indexPlaylist].url));
   }
 };
 </script>
