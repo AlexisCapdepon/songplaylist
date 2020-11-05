@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    {{secondTiming}}
+    {{currentTrackDuration}}
     <v-card
         class="mx-auto"
         max-width="350"
@@ -11,9 +11,9 @@
       ></v-img>
       <v-row dense class="d-flex justify-center">
         <v-col class="d-flex justify-center flex-column align-center">
-          <p class="pa-0 ma-0">{{morceau}}</p>
+          <p class="pa-0 ma-0">{{ track }}</p>
           <p class="pa-0 ma-0">{{artist}}</p>
-          <p v-if="songTiming">  / {{songTiming}}</p>
+          <p v-if="trackDuration"> {{ datingTime }} / {{ trackDuration }}</p>
         </v-col>
         <v-col class="d-flex justify-center align-center">
           <v-card-actions>
@@ -70,11 +70,6 @@
                 mdi-skip-forward
               </v-icon>
             </v-btn>
-            <v-row>
-              <v-col>
-
-              </v-col>
-            </v-row>
           </v-card-actions>
         </v-col>
       </v-row>
@@ -92,34 +87,38 @@ export default {
       sound: '',
       played: false,
       artist: 'Jul',
-      morceau: 'En Y !',
-      songTiming: '',
+      track: 'En Y !',
+      trackDuration: '',
+      interval: null,
+      currentTrackDuration: 0,
     }
   },
   methods: {
     startSong(){
       this.sound.play();
-      this.secondTiming = this.sound.duration
-      this.played = true
-      this.ParsingTiming();
-      this.songTiming = new Date(this.sound.duration * 1000).toISOString().substr(11, 8);
+      this.seekUpdate();
+      this.played = true;
+      this.trackDuration = new Date(this.sound.duration * 1000).toISOString().substr(11, 8);
     },
     stopSong(){
       this.sound.pause();
       this.played = false
+      clearInterval(this.interval);
     },
-    ParsingTiming() {
-        let minutes = Math.floor(this.secondTiming / 60);
-        let secs = this.secondTiming%60;
-        let hours = Math.floor(minutes/60)
-        minutes = minutes%60;
-        this.duration = (`${this.pad(hours)}:${this.pad(minutes)}:${this.pad(secs)}`);
-    },
-    pad(num) {
-      return ("0"+num).slice(-2);
-    },
+    seekUpdate() {
+      if (this.trackDuration >= this.currentTrackDuration) {
+        clearInterval(this.interval)
+      }
+      this.interval = setInterval(() => {
+       this.currentTrackDuration += 1
+      }, 1000);
+    }
   },
-  computed: {},
+  computed: {
+    datingTime: function () {
+      return new Date(this.currentTrackDuration * 1000).toISOString().substr(11, 8);
+    }
+  },
   watch: {},
   created() {
     this.sound = new Audio(require("@/assets/JUL - EN Y _ CLIP OFFICIEL _ D'OR ET DE PLATINE _ 2015.mp3"));
