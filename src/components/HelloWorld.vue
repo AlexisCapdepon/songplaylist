@@ -3,17 +3,17 @@
     {{secondTiming}}
     <v-card
         class="mx-auto"
-        max-width="450"
+        max-width="350"
     >
       <v-img
           src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
-          height="400px"
+          height="250px"
       ></v-img>
       <v-row dense class="d-flex justify-center">
         <v-col class="d-flex justify-center flex-column align-center">
           <p class="pa-0 ma-0">{{morceau}}</p>
           <p class="pa-0 ma-0">{{artist}}</p>
-          <p v-if="startingSong && duration "> {{startingSong}} / {{duration}}</p>
+          <p v-if="songTiming">  / {{songTiming}}</p>
         </v-col>
         <v-col class="d-flex justify-center align-center">
           <v-card-actions>
@@ -25,7 +25,7 @@
                 color="blue"
             >
               <v-icon dark>
-                mdi-heart
+                mdi-skip-backward
               </v-icon>
             </v-btn>
 
@@ -67,10 +67,14 @@
                 color="blue"
             >
               <v-icon dark>
-                mdi-heart
+                mdi-skip-forward
               </v-icon>
             </v-btn>
+            <v-row>
+              <v-col>
 
+              </v-col>
+            </v-row>
           </v-card-actions>
         </v-col>
       </v-row>
@@ -89,10 +93,7 @@ export default {
       played: false,
       artist: 'Jul',
       morceau: 'En Y !',
-      duration: '',
-      secondTiming:'',
-      startingSong:' 00:00 ',
-
+      songTiming: '',
     }
   },
   methods: {
@@ -101,6 +102,7 @@ export default {
       this.secondTiming = this.sound.duration
       this.played = true
       this.ParsingTiming();
+      this.songTiming = new Date(this.sound.duration * 1000).toISOString().substr(11, 8);
     },
     stopSong(){
       this.sound.pause();
