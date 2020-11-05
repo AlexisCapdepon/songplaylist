@@ -1,6 +1,5 @@
 <template>
   <v-container fluid>
-    {{currentTrackDuration}}
     <v-card
         class="mx-auto"
         max-width="350"
@@ -106,9 +105,6 @@ export default {
       clearInterval(this.interval);
     },
     seekUpdate() {
-      if (this.trackDuration >= this.currentTrackDuration) {
-        clearInterval(this.interval)
-      }
       this.interval = setInterval(() => {
        this.currentTrackDuration += 1
       }, 1000);
@@ -119,7 +115,14 @@ export default {
       return new Date(this.currentTrackDuration * 1000).toISOString().substr(11, 8);
     }
   },
-  watch: {},
+  watch: {
+    currentTrackDuration(val) {
+      if (val > this.sound.duration) {
+        clearInterval(this.interval);
+        this.trackDuration = 0
+      }
+    },
+  },
   created() {
     this.sound = new Audio(require("@/assets/JUL - EN Y _ CLIP OFFICIEL _ D'OR ET DE PLATINE _ 2015.mp3"));
   }
