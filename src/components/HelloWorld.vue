@@ -15,7 +15,6 @@
           <v-spacer></v-spacer>
 
           <v-btn
-              color="white"
               icon
           >
             <v-icon>mdi-dots-vertical</v-icon>
@@ -37,10 +36,9 @@
                   fab
                   dark
                   small
-                  color="blue"
                   @click="backSong"
               >
-                <v-icon dark>
+                <v-icon>
                   mdi-skip-backward
                 </v-icon>
               </v-btn>
@@ -52,9 +50,8 @@
                   fab
                   small
                   @click="startSong"
-                  color="blue"
               >
-                <v-icon dark>
+                <v-icon>
                   mdi-play
                 </v-icon>
               </v-btn>
@@ -66,9 +63,8 @@
                   dark
                   small
                   @click="stopSong"
-                  color="blue"
               >
-                <v-icon dark>
+                <v-icon>
                   mdi-pause
                 </v-icon>
               </v-btn>
@@ -79,10 +75,9 @@
                   fab
                   dark
                   small
-                  color="blue"
                   @click="nextSong"
               >
-                <v-icon dark>
+                <v-icon>
                   mdi-skip-forward
                 </v-icon>
               </v-btn>
