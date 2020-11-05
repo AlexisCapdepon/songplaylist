@@ -3,6 +3,7 @@
     <v-card
         class="mx-auto"
         max-width="350"
+        data-app
     >
       <v-img
           height="200px"
@@ -13,12 +14,58 @@
             color="rgba(0, 0, 0, 0)"
         >
           <v-spacer></v-spacer>
-
-          <v-btn
-              icon
+          <v-dialog
+              v-model="dialog"
+              width="500"
           >
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+              >
+                <v-icon id="dialog-playlist">mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+
+            <v-card>
+              <v-card-title class="headline grey lighten-2">
+                Playlist
+              </v-card-title>
+
+              <v-list>
+                <v-list-item
+                    v-for="(item, key) in playlist"
+                    :key="key"
+                    @click="selectMusique(key)"
+                >
+                  <v-list-item-content>
+                    <v-list-item-title v-text="item.track"/>
+                    <v-list-item-subtitle v-text="item.artist"/>
+                  </v-list-item-content>
+
+                  <v-list-item-avatar>
+                    <v-img
+                        :src="require('../assets/' + item.picture)"
+                    />
+                  </v-list-item-avatar>
+                </v-list-item>
+              </v-list>
+              <v-divider></v-divider>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                    color="primary"
+                    text
+                    @click="dialog = false"
+                >
+                  Close
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-app-bar>
       </v-img>
 
@@ -34,7 +81,6 @@
               <v-btn
                   class="mx-2"
                   fab
-                  dark
                   small
                   @click="backSong"
               >
@@ -60,7 +106,6 @@
                   v-else
                   class="mx-2"
                   fab
-                  dark
                   small
                   @click="stopSong"
               >
@@ -73,7 +118,6 @@
               <v-btn
                   class="mx-2"
                   fab
-                  dark
                   small
                   @click="nextSong"
               >
@@ -98,6 +142,7 @@ export default {
     return {
       played: false,
       indexPlaylist: 0,
+      dialog: false,
       playlist: [
         {
           url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
@@ -135,6 +180,10 @@ export default {
       this.seekUpdate();
       this.played = true;
       this.current.trackDuration = new Date(this.current.sound.duration * 1000).toISOString().substr(11, 8);
+
+      this.current.audio.addEventListener('timeupdate', () => {
+        console.log(this.current.audio.duration);
+      });
     },
     stopSong(){
       this.current.sound.pause();
@@ -151,20 +200,17 @@ export default {
       if (this.indexPlaylist >= this.playlist.length) {
         this.indexPlaylist -= 1;
       }
-      this.current.artist = this.playlist[this.indexPlaylist].artist;
-      this.current.track = this.playlist[this.indexPlaylist].track;
-      this.current.sound = new Audio(require("@/assets/"+this.playlist[this.indexPlaylist].url));
     },
     backSong() {
       this.indexPlaylist -= 1;
       if (this.indexPlaylist < 0 ) {
         this.indexPlaylist += 1;
       }
-      this.current.artist = this.playlist[this.indexPlaylist].artist;
-      this.current.track = this.playlist[this.indexPlaylist].track;
-      this.current.picture = this.playlist[this.indexPlaylist].picture;
-      this.current.sound = new Audio(require("@/assets/"+this.playlist[this.indexPlaylist].url));
     },
+    selectMusique(key) {
+      this.indexPlaylist = key
+      this.dialog = false
+    }
   },
   computed: {
     datingTime: function () {
@@ -179,6 +225,16 @@ export default {
         this.played = false;
       }
     },
+    indexPlaylist(val) {
+      this.current.artist = this.playlist[val].artist;
+      this.current.track = this.playlist[val].track;
+      this.current.picture = this.playlist[val].picture;
+      this.current.sound = new Audio(require("@/assets/"+this.playlist[val].url));
+      this.current.currentTrackDuration = 0
+      this.startSong();
+      console.log(this.current.sound);
+    }
+
   },
   created() {
     this.current.artist = this.playlist[this.indexPlaylist].artist;
@@ -188,3 +244,8 @@ export default {
   }
 };
 </script>
+<style>
+#dialog-playlist{
+  color: white;
+}
+</style>
