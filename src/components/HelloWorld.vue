@@ -180,10 +180,6 @@ export default {
       this.seekUpdate();
       this.played = true;
       this.current.trackDuration = new Date(this.current.sound.duration * 1000).toISOString().substr(11, 8);
-
-      this.current.audio.addEventListener('timeupdate', () => {
-        console.log(this.current.audio.duration);
-      });
     },
     stopSong(){
       this.current.sound.pause();
@@ -231,8 +227,6 @@ export default {
       this.current.picture = this.playlist[val].picture;
       this.current.sound = new Audio(require("@/assets/"+this.playlist[val].url));
       this.current.currentTrackDuration = 0
-      this.startSong();
-      console.log(this.current.sound);
     }
 
   },
