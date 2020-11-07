@@ -74,7 +74,7 @@
           <v-col class="d-flex justify-center flex-column align-center">
             <p class="pa-0 ma-0">{{ current.track }}</p>
             <p class="pa-0 ma-0">{{ current.artist }}</p>
-            <p v-if="current.trackDuration"> {{ datingTime }} / {{ current.trackDuration }}</p>
+            <p v-if="current.trackDuration"> {{ current.currentTrackDuration }} / {{ current.trackDuration }}</p>
           </v-col>
           <v-col class="d-flex justify-center align-center">
             <v-card-actions>
@@ -91,11 +91,11 @@
 
               <!-- play-->
               <v-btn
-                  v-if="!played"
+                  v-if="!isPlay"
                   class="mx-2"
                   fab
                   small
-                  @click="startSong"
+                  @click="playSong"
               >
                 <v-icon>
                   mdi-play
@@ -129,6 +129,14 @@
           </v-col>
         </v-row>
       </v-card-text>
+      <v-slider
+          color="lime accent-4"
+          track-color="blue-grey darken-4"
+          :max="current.trackDuration"
+          :v-model="current.currentTrackDuration"
+      />
+      <v-slider v-model="current.volume" @input="updateVolume" max="1" step="0.01"></v-slider>
+      {{  currentVolume }}
     </v-card>
   </v-container>
 
@@ -140,9 +148,10 @@ export default {
   name: "HelloWorld",
   data: function () {
     return {
-      played: false,
+      isPlay: false,
       indexPlaylist: 0,
       dialog: false,
+      player: new Audio(),
       playlist: [
         {
           url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
@@ -166,6 +175,7 @@ export default {
       current: {
         sound: '',
         artist: '',
+        volume: 0.5,
         picture: '',
         track: '',
         trackDuration: '',
@@ -175,21 +185,45 @@ export default {
     }
   },
   methods: {
-    startSong(){
-      this.current.sound.play();
-      this.seekUpdate();
-      this.played = true;
-      this.current.trackDuration = new Date(this.current.sound.duration * 1000).toISOString().substr(11, 8);
+    playSong(){
+
+      if (typeof this.current.sound !== undefined) {
+        this.isPlay = false
+        this.player.src = this.current.sound;
+      }
+
+      this.player.play();
+      this.isPlay = true;
+      this.listenersWhenPlay();
+    },
+
+    listenersWhenPlay() {
+      this.player.addEventListener("timeupdate", () => {
+        let playerTimer = this.player.currentTime;
+        this.current.trackDuration = this.formatTimer(this.player.duration);
+        this.current.currentTrackDuration = this.formatTimer(playerTimer);
+        this.current.percent = (playerTimer * 100) / this.current.trackDuration;
+        this.isPlaying = true;
+      });
+      this.player.addEventListener(
+          "ended",
+          function() {
+            this.nextSong();
+          }.bind(this)
+      );
+    },
+    formatTimer(seconds) {
+      let minutes = parseInt(seconds / 60).toString();
+      seconds = parseInt(seconds % 60).toString();
+
+      let output = minutes >= 10 ? `${minutes}` : `0${minutes}`;
+      output += seconds >= 10 ? `:${seconds}` : `:0${seconds}`;
+
+      return output;
     },
     stopSong(){
-      this.current.sound.pause();
-      this.played = false
-      clearInterval(this.current.interval);
-    },
-    seekUpdate() {
-      this.current.interval = setInterval(() => {
-       this.current.currentTrackDuration += 1
-      }, 1000);
+      this.player.pause();
+      this.isPlay = false
     },
     nextSong() {
       this.indexPlaylist += 1;
@@ -206,27 +240,25 @@ export default {
     selectMusique(key) {
       this.indexPlaylist = key
       this.dialog = false
-    }
+      this.playSong();
+    },
+    updateVolume () {
+      this.player.volume = this.current.volume;
+    },
   },
   computed: {
-    datingTime: function () {
-      return new Date(this.current.currentTrackDuration * 1000).toISOString().substr(11, 8);
+    currentVolume() {
+      return this.current.volume * 100 + '%'
     }
   },
   watch: {
-    currentTrackDuration(val) {
-      if (val > this.current.sound.duration) {
-        clearInterval(this.current.interval);
-        this.current.trackDuration = 0;
-        this.played = false;
-      }
-    },
     indexPlaylist(val) {
       this.current.artist = this.playlist[val].artist;
       this.current.track = this.playlist[val].track;
       this.current.picture = this.playlist[val].picture;
-      this.current.sound = new Audio(require("@/assets/"+this.playlist[val].url));
+      this.current.sound = require("@/assets/"+this.playlist[val].url);
       this.current.currentTrackDuration = 0
+      this.playSong();
     }
 
   },
@@ -234,7 +266,7 @@ export default {
     this.current.artist = this.playlist[this.indexPlaylist].artist;
     this.current.track = this.playlist[this.indexPlaylist].track;
     this.current.picture = this.playlist[this.indexPlaylist].picture
-    this.current.sound = new Audio(require("@/assets/"+this.playlist[this.indexPlaylist].url));
+    this.current.sound = require("@/assets/"+this.playlist[this.indexPlaylist].url);
   }
 };
 </script>
