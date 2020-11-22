@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="d-flex justify-center">
     <v-card
         class="mx-auto"
         max-width="350"
@@ -38,8 +38,23 @@
                 <v-list-item
                     v-for="(item, key) in playlist"
                     :key="key"
-                    @click="selectMusique(key)"
                 >
+                  <v-list-item-action>
+                    <v-btn
+                        icon
+                        play
+                        @click="selectMusique(key)"
+                    >
+                      <v-icon>mdi-play</v-icon>
+                    </v-btn>
+                    <v-btn
+                        icon
+                        play
+                        @click="addFavorite(key)"
+                    >
+                      <v-icon>mdi-heart</v-icon>
+                    </v-btn>
+                  </v-list-item-action>
                   <v-list-item-content>
                     <v-list-item-title v-text="item.track"/>
                     <v-list-item-subtitle v-text="item.artist"/>
@@ -71,6 +86,9 @@
 
       <v-card-text>
         <v-row dense class="d-flex justify-center">
+          <v-col class="d-flex justify-center flex-column align-center">
+           <KnobControl :min="0" :max="1" :stepSize="0.01" v-model="current.volume" @input="updateVolume" ></KnobControl>
+          </v-col>
           <v-col class="d-flex justify-center flex-column align-center">
             <p class="pa-0 ma-0">{{ current.track }}</p>
             <p class="pa-0 ma-0">{{ current.artist }}</p>
@@ -129,23 +147,17 @@
           </v-col>
         </v-row>
       </v-card-text>
-      <v-slider
-          color="lime accent-4"
-          track-color="blue-grey darken-4"
-          :max="current.trackDuration"
-          :v-model="current.currentTrackDuration"
-      />
-      <v-slider v-model="current.volume" @input="updateVolume" max="1" step="0.01"></v-slider>
-      {{  currentVolume }}
+      <v-progress-linear height="5" style="background-color: red" v-model="trackProgression" />
     </v-card>
   </v-container>
 
 </template>
 
 <script>
-
+import KnobControl from 'vue-knob-control'
 export default {
   name: "HelloWorld",
+  components:{KnobControl},
   data: function () {
     return {
       isPlay: false,
@@ -181,6 +193,7 @@ export default {
         trackDuration: '',
         interval: null,
         currentTrackDuration: 0,
+        playerTimer: 0,
       }
     }
   },
@@ -196,13 +209,16 @@ export default {
       this.isPlay = true;
       this.listenersWhenPlay();
     },
-
+    addFavorite(key) {
+      this.playlist[key].favorite = true
+      console.log(this.playlist)
+    },
     listenersWhenPlay() {
       this.player.addEventListener("timeupdate", () => {
-        let playerTimer = this.player.currentTime;
+        this.current.playerTimer = this.player.currentTime;
         this.current.trackDuration = this.formatTimer(this.player.duration);
-        this.current.currentTrackDuration = this.formatTimer(playerTimer);
-        this.current.percent = (playerTimer * 100) / this.current.trackDuration;
+        this.current.currentTrackDuration = this.formatTimer(this.current.playerTimer);
+        this.current.percent = (this.current.playerTimer * 100) / this.current.trackDuration;
         this.isPlaying = true;
       });
       this.player.addEventListener(
@@ -248,8 +264,11 @@ export default {
   },
   computed: {
     currentVolume() {
-      return this.current.volume * 100 + '%'
-    }
+      return this.current.volume * 100 + '%';
+    },
+    trackProgression() {
+      return (this.current.playerTimer / this.player.duration) * 100
+    },
   },
   watch: {
     indexPlaylist(val) {
@@ -273,5 +292,13 @@ export default {
 <style>
 #dialog-playlist{
   color: white;
+}
+.container{
+  display: flex;
+  justify-content: center;
+}
+.v-progress-linear__background{
+  opacity: 1;
+  background-color: black;
 }
 </style>

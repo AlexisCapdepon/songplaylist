@@ -15,6 +15,7 @@
     "lodash": "^4.17.20",
     "momentjs": "^2.0.0",
     "vue": "^2.6.11",
+    "vue-knob-control": "^1.6.0",
     "vue-router": "^3.2.0",
     "vuetify": "^2.2.11"
   },
