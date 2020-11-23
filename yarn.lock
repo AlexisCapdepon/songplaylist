@@ -8203,6 +8203,11 @@ vue-hot-reload-api@^2.3.0:
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.4.tgz#532955cc1eb208a3d990b3a9f9a70574657e08f2"
   integrity sha512-BXq3jwIagosjgNVae6tkHzzIk6a8MHFtzAdwhnV5VlvPTFxDCvIttgSiHWjdGoTJvXtmRu5HacExfdarRcFhog==
 
+vue-knob-control@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/vue-knob-control/-/vue-knob-control-1.6.0.tgz#cf7391c98d423af97ba22609dd04a043227059b0"
+  integrity sha512-oeH5DluTLAOsa+DtWot8eE8ZDyajiyyxm8uvvxQ5psmgKHjSzhGG3enqshuDJbLWH5PW6gBoGfdpch5nvAyFCw==
+
 "vue-loader-v16@npm:vue-loader@^16.0.0-beta.7":
   version "16.0.0-beta.10"
   resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-16.0.0-beta.10.tgz#86569e63bc02e8f0852913004460d3dd58c088e6"

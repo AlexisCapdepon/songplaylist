@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="d-flex justify-center">
     <v-card
         class="mx-auto"
         max-width="350"
@@ -38,8 +38,23 @@
                 <v-list-item
                     v-for="(item, key) in playlist"
                     :key="key"
-                    @click="selectMusique(key)"
                 >
+                  <v-list-item-action>
+                    <v-btn
+                        icon
+                        play
+                        @click="selectMusique(key)"
+                    >
+                      <v-icon>mdi-play</v-icon>
+                    </v-btn>
+                    <v-btn
+                        icon
+                        play
+                        @click="addFavorite(key)"
+                    >
+                      <v-icon>mdi-heart</v-icon>
+                    </v-btn>
+                  </v-list-item-action>
                   <v-list-item-content>
                     <v-list-item-title v-text="item.track"/>
                     <v-list-item-subtitle v-text="item.artist"/>
@@ -72,9 +87,12 @@
       <v-card-text>
         <v-row dense class="d-flex justify-center">
           <v-col class="d-flex justify-center flex-column align-center">
+           <KnobControl :min="0" :max="1" :stepSize="0.01" v-model="current.volume" @input="updateVolume" ></KnobControl>
+          </v-col>
+          <v-col class="d-flex justify-center flex-column align-center">
             <p class="pa-0 ma-0">{{ current.track }}</p>
             <p class="pa-0 ma-0">{{ current.artist }}</p>
-            <p v-if="current.trackDuration"> {{ datingTime }} / {{ current.trackDuration }}</p>
+            <p v-if="current.trackDuration"> {{ current.currentTrackDuration }} / {{ current.trackDuration }}</p>
           </v-col>
           <v-col class="d-flex justify-center align-center">
             <v-card-actions>
@@ -91,11 +109,11 @@
 
               <!-- play-->
               <v-btn
-                  v-if="!played"
+                  v-if="!isPlay"
                   class="mx-2"
                   fab
                   small
-                  @click="startSong"
+                  @click="playSong"
               >
                 <v-icon>
                   mdi-play
@@ -129,20 +147,23 @@
           </v-col>
         </v-row>
       </v-card-text>
+      <v-progress-linear height="5" style="background-color: red" v-model="trackProgression" />
     </v-card>
   </v-container>
 
 </template>
 
 <script>
-
+import KnobControl from 'vue-knob-control'
 export default {
   name: "HelloWorld",
+  components:{KnobControl},
   data: function () {
     return {
-      played: false,
+      isPlay: false,
       indexPlaylist: 0,
       dialog: false,
+      player: new Audio(),
       playlist: [
         {
           url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
@@ -166,30 +187,59 @@ export default {
       current: {
         sound: '',
         artist: '',
+        volume: 0.5,
         picture: '',
         track: '',
         trackDuration: '',
         interval: null,
         currentTrackDuration: 0,
+        playerTimer: 0,
       }
     }
   },
   methods: {
-    startSong(){
-      this.current.sound.play();
-      this.seekUpdate();
-      this.played = true;
-      this.current.trackDuration = new Date(this.current.sound.duration * 1000).toISOString().substr(11, 8);
+    playSong(){
+
+      if (typeof this.current.sound !== undefined) {
+        this.isPlay = false
+        this.player.src = this.current.sound;
+      }
+
+      this.player.play();
+      this.isPlay = true;
+      this.listenersWhenPlay();
+    },
+    addFavorite(key) {
+      this.playlist[key].favorite = true
+      console.log(this.playlist)
+    },
+    listenersWhenPlay() {
+      this.player.addEventListener("timeupdate", () => {
+        this.current.playerTimer = this.player.currentTime;
+        this.current.trackDuration = this.formatTimer(this.player.duration);
+        this.current.currentTrackDuration = this.formatTimer(this.current.playerTimer);
+        this.current.percent = (this.current.playerTimer * 100) / this.current.trackDuration;
+        this.isPlaying = true;
+      });
+      this.player.addEventListener(
+          "ended",
+          function() {
+            this.nextSong();
+          }.bind(this)
+      );
+    },
+    formatTimer(seconds) {
+      let minutes = parseInt(seconds / 60).toString();
+      seconds = parseInt(seconds % 60).toString();
+
+      let output = minutes >= 10 ? `${minutes}` : `0${minutes}`;
+      output += seconds >= 10 ? `:${seconds}` : `:0${seconds}`;
+
+      return output;
     },
     stopSong(){
-      this.current.sound.pause();
-      this.played = false
-      clearInterval(this.current.interval);
-    },
-    seekUpdate() {
-      this.current.interval = setInterval(() => {
-       this.current.currentTrackDuration += 1
-      }, 1000);
+      this.player.pause();
+      this.isPlay = false
     },
     nextSong() {
       this.indexPlaylist += 1;
@@ -206,27 +256,28 @@ export default {
     selectMusique(key) {
       this.indexPlaylist = key
       this.dialog = false
-    }
+      this.playSong();
+    },
+    updateVolume () {
+      this.player.volume = this.current.volume;
+    },
   },
   computed: {
-    datingTime: function () {
-      return new Date(this.current.currentTrackDuration * 1000).toISOString().substr(11, 8);
-    }
+    currentVolume() {
+      return this.current.volume * 100 + '%';
+    },
+    trackProgression() {
+      return (this.current.playerTimer / this.player.duration) * 100
+    },
   },
   watch: {
-    currentTrackDuration(val) {
-      if (val > this.current.sound.duration) {
-        clearInterval(this.current.interval);
-        this.current.trackDuration = 0;
-        this.played = false;
-      }
-    },
     indexPlaylist(val) {
       this.current.artist = this.playlist[val].artist;
       this.current.track = this.playlist[val].track;
       this.current.picture = this.playlist[val].picture;
-      this.current.sound = new Audio(require("@/assets/"+this.playlist[val].url));
+      this.current.sound = require("@/assets/"+this.playlist[val].url);
       this.current.currentTrackDuration = 0
+      this.playSong();
     }
 
   },
@@ -234,12 +285,20 @@ export default {
     this.current.artist = this.playlist[this.indexPlaylist].artist;
     this.current.track = this.playlist[this.indexPlaylist].track;
     this.current.picture = this.playlist[this.indexPlaylist].picture
-    this.current.sound = new Audio(require("@/assets/"+this.playlist[this.indexPlaylist].url));
+    this.current.sound = require("@/assets/"+this.playlist[this.indexPlaylist].url);
   }
 };
 </script>
 <style>
 #dialog-playlist{
   color: white;
+}
+.container{
+  display: flex;
+  justify-content: center;
+}
+.v-progress-linear__background{
+  opacity: 1;
+  background-color: black;
 }
 </style>
