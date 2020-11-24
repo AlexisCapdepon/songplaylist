@@ -13,79 +13,8 @@
             flat
             color="rgba(0, 0, 0, 0)"
         >
-          <v-spacer></v-spacer>
-          <v-dialog
-              v-model="dialog"
-              width="500"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-
-                  icon
-                  v-bind="attrs"
-                  v-on="on"
-              >
-                <v-icon id="dialog-playlist">mdi-dots-vertical</v-icon>
-              </v-btn>
-            </template>
-
-            <v-card>
-              <v-card-title class="headline grey lighten-2">
-                <h1>Playlist</h1>
-                <v-spacer/>
-                <div>
-                  <v-btn v-if="!isFavorite" @click="checkIsFavorite">Favorite</v-btn>
-                  <v-btn v-if="isFavorite" @click="checkIsFavorite">ALL</v-btn>
-                </div>
-              </v-card-title>
-
-              <v-list>
-                <v-list-item
-                    v-for="(item, key) in filterList"
-                    :key="key"
-                >
-                  <v-list-item-action>
-                    <v-btn
-                        icon
-                        play
-                        @click="selectMusique(key)"
-                    >
-                      <v-icon>mdi-play</v-icon>
-                    </v-btn>
-                    <v-btn
-                        icon
-                        play
-                        @click="addFavorite(key)"
-                    >
-                      <v-icon>mdi-heart</v-icon>
-                    </v-btn>
-                  </v-list-item-action>
-                  <v-list-item-content>
-                    <v-list-item-title v-text="item.track"/>
-                    <v-list-item-subtitle v-text="item.artist"/>
-                  </v-list-item-content>
-
-                  <v-list-item-avatar>
-                    <v-img
-                        :src="require('../assets/' + item.picture)"
-                    />
-                  </v-list-item-avatar>
-                </v-list-item>
-              </v-list>
-              <v-divider></v-divider>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                    color="primary"
-                    text
-                    @click="dialog = false"
-                >
-                  Close
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
+          <v-spacer/>
+          <playlist-dialog :filter-list="filterList" :is-favorite="isFavorite"/>
         </v-app-bar>
       </v-img>
 
@@ -97,7 +26,6 @@
           <v-col class="d-flex justify-center flex-column align-center">
             <p class="pa-0 ma-0">{{ current.track }}</p>
             <p class="pa-0 ma-0">{{ current.artist }}</p>
-            <p v-if="current.trackDuration"> {{ current.currentTrackDuration }} / {{ current.trackDuration }}</p>
           </v-col>
           <v-col class="d-flex justify-center align-center">
             <v-card-actions>
@@ -153,43 +81,26 @@
         </v-row>
       </v-card-text>
       <v-progress-linear height="5" style="background-color: red" v-model="trackProgression" />
+      <p v-if="current.trackDuration"> {{ current.currentTrackDuration }} / {{ current.trackDuration }}</p>
     </v-card>
   </v-container>
 
 </template>
 
 <script>
-import KnobControl from 'vue-knob-control'
+import KnobControl from 'vue-knob-control';
+import {mapState} from 'vuex';
+import PlaylistDialog from "@/components/PlaylistDialog";
+
 export default {
   name: "HelloWorld",
-  components:{KnobControl},
+  components:{PlaylistDialog, KnobControl},
   data: function () {
     return {
       isPlay: false,
       indexPlaylist: 0,
       dialog: false,
       player: new Audio(),
-      playlist: [
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'RRul',
-          track: 'En Y !',
-        },
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'Ju',
-          track: 'EnY !',
-        },
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'l',
-          track: ' Y !',
-        },
-      ],
-      isFavorite: false,
       current: {
         sound: '',
         artist: '',
@@ -197,7 +108,6 @@ export default {
         picture: '',
         track: '',
         trackDuration: '',
-        interval: null,
         currentTrackDuration: 0,
         playerTimer: 0,
       }
@@ -212,17 +122,6 @@ export default {
       this.player.play();
       this.isPlay = true;
       this.listenersWhenPlay();
-    },
-    checkIsFavorite() {
-      console.log((this.isFavorite === true) ? this.isFavorite = false : this.isFavorite = true);
-    },
-    addFavorite(key) {
-      if(this.playlist[key].favorite){
-        this.playlist[key].favorite = false;
-      } else {
-        this.playlist[key].favorite = true
-      }
-
     },
     listenersWhenPlay() {
       this.player.addEventListener("timeupdate", () => {
@@ -274,19 +173,15 @@ export default {
     },
   },
   computed: {
-    currentVolume() {
-      return this.current.volume * 100 + '%';
-    },
+    ...mapState([
+        "playlist",
+        "isFavorite",
+    ]),
     filterList() {
       if (this.isFavorite) {
-        console.log('called')
         return (this.playlist.filter(item => (item.favorite === true) ));
       }
-      return this.playlist.filter(item => {
-        if(!this.search) return this.playlist;
-        return (item.artist.toLowerCase().includes(this.search.toLowerCase())
-            || (item.track.toLowerCase().includes(this.search.toLowerCase())));
-      })
+      return this.playlist;
     },
     trackProgression() {
       return (this.current.playerTimer / this.player.duration) * 100
@@ -301,13 +196,15 @@ export default {
       this.current.currentTrackDuration = 0
       this.playSong();
     }
-
   },
   created() {
     this.current.artist = this.playlist[this.indexPlaylist].artist;
     this.current.track = this.playlist[this.indexPlaylist].track;
     this.current.picture = this.playlist[this.indexPlaylist].picture
     this.current.sound = require("@/assets/"+this.playlist[this.indexPlaylist].url);
+  },
+  destroyed() {
+    this.stopSong();
   }
 };
 </script>

@@ -2,8 +2,8 @@
   <v-container fluid class="d-flex justify-center" data-app>
     <v-row>
        <v-col>
-         <v-row>
-           <v-col> <v-text-field v-if="!isFavorite" v-model="search"></v-text-field> </v-col>
+         <v-row class="d-flex justify-center align-center">
+           <v-col> <v-text-field v-if="!isFavorite" placeholder="Recherche" v-model="search"></v-text-field> </v-col>
            <v-col>
              <v-btn v-if="!isFavorite" @click="checkIsFavorite">Favorite</v-btn>
              <v-btn v-if="isFavorite" @click="checkIsFavorite">ALL</v-btn>
@@ -34,34 +34,14 @@
 </template>
 
 <script>
+import {mapState} from "vuex";
+
 export default {
   name: "about",
   data: function () {
     return {
       search: '',
       dialog: false,
-      playlist: [
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'RRul',
-          favorite: true,
-          track: 'En Y !',
-        },
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'Ju',
-          track: 'EnY !',
-        },
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'l',
-          track: ' Y !',
-        },
-      ],
-      isFavorite: true,
     }
   },
   methods: {
@@ -69,13 +49,12 @@ export default {
       this.$router.push(`/artist/${key}`)
     },
     checkIsFavorite() {
-      console.log((this.isFavorite === true) ? this.isFavorite = false : this.isFavorite = true);
+      (this.isFavorite === true) ? this.$store.dispatch('isFavoriteCheck', false) : this.$store.dispatch('isFavoriteCheck', true);
     },
   },
   computed: {
     filterList() {
       if (this.isFavorite) {
-        console.log('called')
         return (this.playlist.filter(item => (item.favorite === true) ));
       }
       return this.playlist.filter(item => {
@@ -83,7 +62,11 @@ export default {
         return (item.artist.toLowerCase().includes(this.search.toLowerCase())
             || (item.track.toLowerCase().includes(this.search.toLowerCase())));
       })
-    }
+    },
+    ...mapState([
+      "playlist",
+      "isFavorite",
+    ]),
   },
   watch: {
     isFavorite() {

@@ -38,36 +38,23 @@
 </template>
 
 <script>
+import {mapState} from "vuex";
+
 export default {
   name: "DetailsArtist",
   data: function () {
-    return {
-      playlist: [
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'RRul',
-          track: 'En Y !',
-        },
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'Ju',
-          track: 'EnY !',
-        },
-        {
-          url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
-          picture: 'jul.jpg',
-          artist: 'l',
-          track: ' Y !',
-        },
-      ],
-    }
+    return {}
   },
   computed: {
     artistSelected() {
       return this.playlist[this.$route.params.id];
     },
+    computed: {
+      ...mapState([
+        "playlist",
+        "isFavorite",
+      ]),
+    }
   },
   methods: {
     goToList() {
