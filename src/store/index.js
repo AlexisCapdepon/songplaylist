@@ -30,6 +30,7 @@ export default new Vuex.Store({
     ],
     isFavorite: false,
     isShowPlayList: false,
+    item: {},
   },
   mutations: {
     ADD_TO_FAVORITE(state, key){
@@ -43,6 +44,9 @@ export default new Vuex.Store({
     },
     SHOW_PLAYLIST(state, isShowPlaylist) {
       state.showPlayList = isShowPlaylist;
+    },
+    SET_ITEM(state, key){
+      state.item = state.playlist[key];
     }
   },
   actions: {
@@ -58,5 +62,8 @@ export default new Vuex.Store({
     showPlaylist({commit}, isShowPlaylist) {
       commit('SHOW_PLAYLIST', isShowPlaylist)
     },
+    setItem({commit}, key) {
+      commit('SET_ITEM', key);
+    }
   },
 })

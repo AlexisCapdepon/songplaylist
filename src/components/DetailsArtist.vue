@@ -11,25 +11,25 @@
        <v-icon>mdi-chevron-left</v-icon>
      </v-btn>
      <v-img
-         :src="require('../assets/' + artistSelected.picture)"
+         :src="require('../assets/' + item.picture)"
          height="300px"
          dark
      >
        <v-row class="fill-height">
            <v-card-title class="white--text pl-12 pt-12">
              <div class="display-1 pl-12 pt-12">
-               {{artistSelected.artist}}
+               {{item.artist}}
              </div>
            </v-card-title>
        </v-row>
      </v-img>
 
      <v-list two-line>
-       {{artistSelected.track}}
+       {{item.track}}
        <v-btn
            icon
            play
-           @click="addFavorite(key)"
+           @click="addFavorite"
        >
          <v-icon>mdi-heart</v-icon>
        </v-btn>
@@ -46,19 +46,21 @@ export default {
     return {}
   },
   computed: {
-    artistSelected() {
-      return this.playlist[this.$route.params.id];
-    },
-    computed: {
-      ...mapState([
-        "playlist",
-        "isFavorite",
-      ]),
-    }
+    ...mapState([
+        "item"
+    ]),
   },
   methods: {
     goToList() {
       this.$router.push('/artist');
+    },
+    addFavorite() {
+      if (!this.item.favorite) {
+        console.log(this.$route.params.id)
+        this.$store.dispatch('addToFavorite', this.$route.params.id)
+      } else {
+        this.$store.dispatch('removeToFavorite', this.$route.params.id)
+      }
     }
   }
 }

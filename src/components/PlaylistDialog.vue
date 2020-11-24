@@ -99,7 +99,7 @@ export default {
       (this.isFavorite === true) ? this.$store.dispatch('isFavoriteCheck', false) : this.$store.dispatch('isFavoriteCheck', true);
     },
     addFavorite(key) {
-      if (!this.playlist[key].favorite) {
+      if (!this.filterList[key].favorite) {
         this.$store.dispatch('addToFavorite', key)
       } else {
         this.$store.dispatch('removeToFavorite', key)

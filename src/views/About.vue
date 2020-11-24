@@ -46,6 +46,7 @@ export default {
   },
   methods: {
     goToDetails(key) {
+      this.$store.dispatch('setItem', key);
       this.$router.push(`/artist/${key}`)
     },
     checkIsFavorite() {
