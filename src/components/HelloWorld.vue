@@ -31,12 +31,17 @@
 
             <v-card>
               <v-card-title class="headline grey lighten-2">
-                Playlist
+                <h1>Playlist</h1>
+                <v-spacer/>
+                <div>
+                  <v-btn v-if="!isFavorite" @click="checkIsFavorite">Favorite</v-btn>
+                  <v-btn v-if="isFavorite" @click="checkIsFavorite">ALL</v-btn>
+                </div>
               </v-card-title>
 
               <v-list>
                 <v-list-item
-                    v-for="(item, key) in playlist"
+                    v-for="(item, key) in filterList"
                     :key="key"
                 >
                   <v-list-item-action>
@@ -184,6 +189,7 @@ export default {
           track: ' Y !',
         },
       ],
+      isFavorite: false,
       current: {
         sound: '',
         artist: '',
@@ -199,19 +205,24 @@ export default {
   },
   methods: {
     playSong(){
-
       if (typeof this.current.sound !== undefined) {
         this.isPlay = false
         this.player.src = this.current.sound;
       }
-
       this.player.play();
       this.isPlay = true;
       this.listenersWhenPlay();
     },
+    checkIsFavorite() {
+      console.log((this.isFavorite === true) ? this.isFavorite = false : this.isFavorite = true);
+    },
     addFavorite(key) {
-      this.playlist[key].favorite = true
-      console.log(this.playlist)
+      if(this.playlist[key].favorite){
+        this.playlist[key].favorite = false;
+      } else {
+        this.playlist[key].favorite = true
+      }
+
     },
     listenersWhenPlay() {
       this.player.addEventListener("timeupdate", () => {
@@ -265,6 +276,17 @@ export default {
   computed: {
     currentVolume() {
       return this.current.volume * 100 + '%';
+    },
+    filterList() {
+      if (this.isFavorite) {
+        console.log('called')
+        return (this.playlist.filter(item => (item.favorite === true) ));
+      }
+      return this.playlist.filter(item => {
+        if(!this.search) return this.playlist;
+        return (item.artist.toLowerCase().includes(this.search.toLowerCase())
+            || (item.track.toLowerCase().includes(this.search.toLowerCase())));
+      })
     },
     trackProgression() {
       return (this.current.playerTimer / this.player.duration) * 100
