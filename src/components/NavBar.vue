@@ -1,6 +1,6 @@
 <template>
   <v-app-bar>
-    <v-toolbar-title class="pa-2">TapeTonSon</v-toolbar-title>
+    <v-toolbar-title class="pa-2">TapeTonSons</v-toolbar-title>
     <v-spacer/>
     <v-toolbar-items>
       <v-btn text @click="goToPlayers">Player</v-btn>
