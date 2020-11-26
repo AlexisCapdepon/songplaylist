@@ -4,6 +4,7 @@ import vuetify from './plugins/vuetify';
 import router from './router'
 import KnobControl from 'vue-knob-control';
 import store from './store'
+import './registerServiceWorker'
 
 Vue.config.productionTip = false
 
