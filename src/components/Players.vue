@@ -8,6 +8,7 @@
       <v-img
           height="200px"
           :src="require('../assets/' + current.picture)"
+          alt="currentTrackSong"
       >
         <v-app-bar
             flat

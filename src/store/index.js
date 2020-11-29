@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     playlist: [
       {
+        id: 1,
         url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
         picture: 'jul.jpg',
         artist: 'RRul',
@@ -14,14 +15,16 @@ export default new Vuex.Store({
         favorite: false,
       },
       {
-        url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
+        id: 2,
+        url: 'JACK UZI - FREESTYLE 2 LÉTÉ (2020).mp3',
         picture: 'jul.jpg',
         artist: 'Ju',
         track: 'EnY !',
         favorite: false,
       },
       {
-        url: 'JUL - EN Y _ CLIP OFFICIEL _ D\'OR ET DE PLATINE _ 2015.mp3',
+        id: 3,
+        url: 'Droplex, Corner - Wealth & Power (Original Mix).mp3',
         picture: 'jul.jpg',
         artist: 'l',
         track: ' Y !',
@@ -34,10 +37,10 @@ export default new Vuex.Store({
   },
   mutations: {
     ADD_TO_FAVORITE(state, key){
-      state.playlist[key].favorite = true;
+      state.playlist.find(item => item.id === key).favorite = true
     },
     REMOVE_TO_FAVORITE(state, key){
-      state.playlist[key].favorite = false;
+      state.playlist.find(item => item.id === key).favorite = false
     },
     CHECKED_IS_FAVORITE(state, isFavorite) {
       state.isFavorite = isFavorite;
