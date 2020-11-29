@@ -13,6 +13,7 @@
      <v-img
          :src="require('../assets/' + item.picture)"
          height="300px"
+         alt="detailPictur"
          dark
      >
        <v-row class="fill-height">
@@ -57,9 +58,9 @@ export default {
     addFavorite() {
       if (!this.item.favorite) {
         console.log(this.$route.params.id)
-        this.$store.dispatch('addToFavorite', this.$route.params.id)
+        this.$store.dispatch('addToFavorite', this.item.id)
       } else {
-        this.$store.dispatch('removeToFavorite', this.$route.params.id)
+        this.$store.dispatch('removeToFavorite', this.item.id)
       }
     }
   }

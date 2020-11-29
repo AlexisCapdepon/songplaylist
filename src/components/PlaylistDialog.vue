@@ -100,9 +100,9 @@ export default {
     },
     addFavorite(key) {
       if (!this.filterList[key].favorite) {
-        this.$store.dispatch('addToFavorite', key)
+        this.$store.dispatch('addToFavorite', this.filterList[key].id)
       } else {
-        this.$store.dispatch('removeToFavorite', key)
+        this.$store.dispatch('removeToFavorite', this.filterList[key].id)
       }
     }
   }
