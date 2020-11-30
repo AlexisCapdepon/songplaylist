@@ -17,7 +17,7 @@ export default new Vuex.Store({
       {
         id: 2,
         url: 'JACK UZI - FREESTYLE 2 LÉTÉ (2020).mp3',
-        picture: 'jul.jpg',
+        picture: 'uzi.jpg',
         artist: 'Ju',
         track: 'EnY !',
         favorite: false,
@@ -25,7 +25,7 @@ export default new Vuex.Store({
       {
         id: 3,
         url: 'Droplex, Corner - Wealth & Power (Original Mix).mp3',
-        picture: 'jul.jpg',
+        picture: 'droplex.jpg',
         artist: 'l',
         track: ' Y !',
         favorite: true,
